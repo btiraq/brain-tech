@@ -43,7 +43,7 @@ function doPost(e) {
       loginSheet.autoResizeColumns(1, 4);
     } else if (data.action === 'loadProjects') {
       // Load projects
-      var projectsSheet = ss.getSheetByName('Projects') || ss.insertSheet('Projects');
+      var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
       var projectsData = projectsSheet.getDataRange().getValues();
       var projects = [];
       for (var i = 1; i < projectsData.length; i++) { // Skip header
@@ -64,7 +64,7 @@ function doPost(e) {
       .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type'});
     } else if (data.action === 'saveProject') {
       // Save project (add or update)
-      var projectsSheet = ss.getSheetByName('Projects') || ss.insertSheet('Projects');
+      var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
       if (projectsSheet.getLastRow() === 0) {
         projectsSheet.appendRow([
           "ID",
@@ -117,7 +117,7 @@ function doPost(e) {
       projectsSheet.autoResizeColumns(1, 6);
     } else if (data.action === 'deleteProject') {
       // Delete project
-      var projectsSheet = ss.getSheetByName('Projects') || ss.insertSheet('Projects');
+      var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
       var projectsData = projectsSheet.getDataRange().getValues();
       for (var i = 1; i < projectsData.length; i++) {
         if (projectsData[i][0] == data.id) {
