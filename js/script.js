@@ -228,7 +228,7 @@ window.addEventListener('load', () => {
 })();
 
 // ========== PROJECTS 3D PREVIEWS ==========
-const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbysrySHKpERstgeCe7jnvxSf5MlNpUdUGg4KqLnGdL6pewrMq5WOANWFblZiT3yyjB1/exec";
+const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbwbn8secROxZqCOCdSkauDaLA8qF3J9bHn40H0CzzLY4UMIBacP6CcBWwoksza8Qa9F/exec";
 const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbzKlIZkW5d5FyIKxBbJjhcVJNer0pNVZ26AK-3-fl3sWOqevUii-ATJIKmj3JBRSVc30Q/exec";
 const defaultProjects = [
     { title:"PID Ball Balance Robot", tags:["AI","Raspberry Pi","Control"], desc:"روبوت يوازن الكرة باستخدام حساسات PID control مع شرح شامل وكود source كامل.", color:0x0044ff },
