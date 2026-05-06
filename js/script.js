@@ -341,6 +341,7 @@ async function initProjects() {
             }
             anim();
         }, 100);
+    }
     });
 }
 
