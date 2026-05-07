@@ -294,19 +294,17 @@ async function getDisplayProjects() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'loadProjects' })
         });
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error('Network error');
         const data = await response.json();
+        console.log('Projects loaded:', data); // ADD debug log
         if (data.result === 'success' && data.projects && data.projects.length > 0) {
             const projects = data.projects.map(formatProjectForDisplay);
             localStorage.setItem('braintechLocalProjects', JSON.stringify(data.projects));
             return projects;
         }
-        const local = getLocalProjects();
-        if (local.length > 0) {
-            return local.map(formatProjectForDisplay);
-        }
+        throw new Error('No projects from API');
     } catch (e) {
-        console.log('Failed to load projects from API, using local fallback if available:', e);
+        console.log('API failed, using local:', e);
         const local = getLocalProjects();
         if (local.length > 0) {
             return local.map(formatProjectForDisplay);
@@ -318,6 +316,8 @@ async function getDisplayProjects() {
 // Initialize projects
 async function initProjects() {
     const projectsData = await getDisplayProjects();
+    console.log('Rendering projects:', projectsData.length); // ADD THIS
+    console.log('Projects data:', projectsData); // ADD THIS
 
     const grid = document.getElementById('projectsGrid');
     projectsData.forEach((p, idx) => {
@@ -395,6 +395,7 @@ async function initProjects() {
         }, 100);
     }
     });
+    console.log('Grid HTML length:', grid.innerHTML.length);
 }
 
 // Call initProjects on load and refresh projects periodically
@@ -450,6 +451,21 @@ function openModal(p) {
     
     document.getElementById('modal').classList.add('open');
 }
+// ========== CLOSE MODAL ==========
+function closeModal() {
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.classList.remove('open');
+    }
+}
+document.getElementById('closeModal').onclick = function() {
+    document.getElementById('modal').classList.remove('open');
+}
+document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.remove('open');
+    }
+});
 // ========== LANG TOGGLE ==========
 let isAr = true;
 document.getElementById('langBtn').addEventListener('click', () => {
