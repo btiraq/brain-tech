@@ -767,22 +767,65 @@
         .modal-close:hover { border-color: var(--cyan); color: var(--cyan); }
         .modal-icon { font-size: 3rem; color: var(--cyan); margin-bottom: 16px; }
         .modal-title { font-family: 'Orbitron', monospace; font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; }
-        .modal-images { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
-        .modal-images img { max-width: 150px; max-height: 100px; border-radius: 8px; object-fit: cover; }
+        .modal-images {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+            max-height: 320px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px;
+        }
+
+        .modal-images img {
+            max-width: 280px;
+            max-height: 280px;
+            width: auto;
+            height: auto;
+            border-radius: 12px;
+            object-fit: contain;
+            background: rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
         .modal-details-scroll {
-            max-height: 300px;
+            max-height: 280px;
             overflow-y: auto;
             margin-bottom: 20px;
-            padding: 15px;
+            padding: 18px;
             background: rgba(0,194,209,0.05);
             border: 1px solid rgba(0,194,209,0.15);
             border-radius: 12px;
         }
-        .modal-details-scroll::-webkit-scrollbar { width: 6px; }
-        .modal-details-scroll::-webkit-scrollbar-track { background: rgba(0,194,209,0.05); border-radius: 10px; }
-        .modal-details-scroll::-webkit-scrollbar-thumb { background: var(--cyan-dark); border-radius: 10px; }
-        .modal-details-scroll::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
-        .modal-desc { color: var(--gray); font-size: 0.95rem; line-height: 1.7; margin-bottom: 15px; }
+
+        .modal-details-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-details-scroll::-webkit-scrollbar-track {
+            background: rgba(0,194,209,0.05);
+            border-radius: 10px;
+        }
+
+        .modal-details-scroll::-webkit-scrollbar-thumb {
+            background: var(--cyan-dark);
+            border-radius: 10px;
+        }
+
+        .modal-details-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--cyan);
+        }
+
+        .modal-desc {
+            color: var(--gray);
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
         .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
         .modal-btn {
             background: var(--cyan);

@@ -270,12 +270,19 @@ function getLocalProjects() {
 }
 
 function formatProjectForDisplay(p) {
+    let images = normalizeArrayField(p.images || p.image);
+    images = images.map(img => {
+        if (img && img.startsWith('data:image')) {
+            return img;
+        }
+        return img;
+    });
     return {
         title: p.title || 'مشروع جديد',
         tags: normalizeArrayField(p.tags),
         desc: p.description || p.desc || '',
         color: 0x00C2D1,
-        images: normalizeArrayField(p.images || p.image)
+        images: images
     };
 }
 
@@ -433,20 +440,16 @@ function openModal(p) {
     document.getElementById('modalDesc').textContent = p.desc;
     document.getElementById('modalTags').innerHTML = p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
     
-    // Display images
     const imagesContainer = document.getElementById('modalImages');
     const images = p.images || (p.image ? [p.image] : []);
     if (images.length > 0) {
-        imagesContainer.innerHTML = images.map(img => `<img src="${img}" alt="${p.title}">`).join('');
+        imagesContainer.innerHTML = images.map(img => `<img src="${img}" alt="${p.title}" loading="lazy">`).join('');
     } else {
-        imagesContainer.innerHTML = '';
+        imagesContainer.innerHTML = '<p style="color:var(--gray);">لا توجد صور لهذا المشروع</p>';
     }
     
     document.getElementById('modal').classList.add('open');
 }
-document.getElementById('closeModal').onclick = () => document.getElementById('modal').classList.remove('open');
-document.getElementById('modal').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
-
 // ========== LANG TOGGLE ==========
 let isAr = true;
 document.getElementById('langBtn').addEventListener('click', () => {

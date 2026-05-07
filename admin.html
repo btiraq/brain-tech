@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -494,12 +495,21 @@
                                 <input type="text" id="projectTitle" required placeholder="مثال: تطبيق IoT">
                             </div>
                             <div class="form-group">
-                                <label>رابط صورة المشروع الرئيسية *</label>
-                                <input type="text" id="projectImageUrl" required placeholder="https://example.com/image.jpg">
+                                <label>الصورة الرئيسية *</label>
+                                <input type="file" id="projectImageFile" accept="image/*" style="background: rgba(5,5,8,0.5); border: 1px solid rgba(0,194,209,0.15); border-radius: 10px; padding: 12px; color: var(--text);">
+                                <div id="mainImagePreview" style="margin-top: 10px; display: none;">
+                                    <img id="mainPreviewImg" style="max-width: 100px; max-height: 100px; border-radius: 8px;">
+                                </div>
+                                <label style="margin-top: 10px; color: var(--gray);">أو أدخل رابط الصورة يدوياً:</label>
+                                <input type="text" id="projectImageUrl" placeholder="https://example.com/image.jpg">
                             </div>
                             <div class="form-group form-full">
-                                <label>روابط صور إضافية</label>
-                                <input type="text" id="projectImagesUrls" placeholder="رابط واحد أو عدة روابط مفصولة بفاصلة">
+                                <label>روابط صور إضافية (اختر ملفات أو أدخل روابط)</label>
+                                <input type="file" id="projectImagesFiles" accept="image/*" multiple style="background: rgba(5,5,8,0.5); border: 1px solid rgba(0,194,209,0.15); border-radius: 10px; padding: 12px; color: var(--text);">
+                                <div id="extraImagesPreview" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                                <label style="margin-top: 10px; color: var(--gray);">أو أدخل روابط الصور الإضافية مفصولة بفاصلة:</label>
+                                <input type="text" id="projectImagesUrls" placeholder="رابط1, رابط2, رابط3">
+                                <small style="color: #5A6070; margin-top: 5px; display: block;">يمكنك اختيار صورة واحدة أو أكثر</small>
                             </div>
                             <div class="form-group">
                                 <label>التصنيف *</label>
@@ -558,12 +568,20 @@
                     <input type="text" id="editTitle" required>
                 </div>
                 <div class="form-group">
-                    <label>رابط صورة المشروع الرئيسية</label>
-                    <input type="text" id="editImageUrl" placeholder="https://example.com/image.jpg" required>
+                    <label>الصورة الرئيسية</label>
+                    <input type="file" id="editImageFile" accept="image/*" style="background: rgba(5,5,8,0.5); border: 1px solid rgba(0,194,209,0.15); border-radius: 10px; padding: 12px; color: var(--text);">
+                    <div id="editMainImagePreview" style="margin-top: 10px; display: none;">
+                        <img id="editMainPreviewImg" style="max-width: 100px; max-height: 100px; border-radius: 8px;">
+                    </div>
+                    <label style="margin-top: 10px; color: var(--gray);">أو أدخل رابط الصورة يدوياً:</label>
+                    <input type="text" id="editImageUrl" placeholder="https://example.com/image.jpg">
                 </div>
-                <div class="form-group">
-                    <label>روابط صور إضافية</label>
-                    <input type="text" id="editImagesUrls" placeholder="رابط واحد أو عدة روابط مفصولة بفاصلة">
+                <div class="form-group form-full">
+                    <label>صور إضافية</label>
+                    <input type="file" id="editImagesFiles" multiple accept="image/*" style="background: rgba(5,5,8,0.5); border: 1px solid rgba(0,194,209,0.15); border-radius: 10px; padding: 12px; color: var(--text);">
+                    <div id="editExtraImagesPreview" style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                    <label style="margin-top: 10px; color: var(--gray);">أو أدخل روابط الصور الإضافية مفصولة بفاصلة:</label>
+                    <input type="text" id="editImagesUrls" placeholder="رابط1, رابط2, رابط3">
                 </div>
                 <div class="form-group">
                     <label>التصنيف</label>
@@ -601,6 +619,102 @@
         let currentDraftId = null;
         let projectsCache = [];
         let autoSaveTimer = null;
+                // NEW: دوال ضغط وتحويل الصور
+        async function compressAndConvertToBase64(file) {
+            const options = {
+                maxSizeMB: 0.2,
+                maxWidthOrHeight: 800,
+                useWebWorker: true,
+                fileType: 'image/jpeg'
+            };
+            try {
+                const compressedFile = await imageCompression(file, options);
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(compressedFile);
+                });
+            } catch (error) {
+                console.error('Compression error:', error);
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // NEW: معاينة الصورة الرئيسية
+        document.getElementById('projectImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    document.getElementById('mainPreviewImg').src = ev.target.result;
+                    document.getElementById('mainImagePreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // NEW: معاينة الصور الإضافية
+        document.getElementById('projectImagesFiles').addEventListener('change', function(e) {
+            const container = document.getElementById('extraImagesPreview');
+            container.innerHTML = '';
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.style.width = '80px';
+                    img.style.height = '80px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    img.style.border = '1px solid rgba(0,194,209,0.3)';
+                    container.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        document.getElementById('editImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const previewDiv = document.getElementById('editMainImagePreview');
+            const previewImg = document.getElementById('editMainPreviewImg');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    previewImg.src = ev.target.result;
+                    previewDiv.style.display = 'block';
+                    document.getElementById('editImageUrl').value = '';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewDiv.style.display = 'none';
+                previewImg.src = '';
+            }
+        });
+
+        document.getElementById('editImagesFiles').addEventListener('change', function(e) {
+            const container = document.getElementById('editExtraImagesPreview');
+            container.innerHTML = '';
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    img.style.width = '80px';
+                    img.style.height = '80px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    img.style.border = '1px solid rgba(0,194,209,0.3)';
+                    container.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
         let hasUnsavedChanges = false;
 
         function parseImageUrls(value) {
@@ -609,14 +723,37 @@
             return value.split(',').map(url => url.trim()).filter(Boolean);
         }
 
-        function getCurrentProjectFromForm() {
+        async function getCurrentProjectFromFormAsync() {
+            let mainImageBase64 = null;
+            const mainFile = document.getElementById('projectImageFile').files[0];
             const mainUrl = document.getElementById('projectImageUrl').value;
+            
+            if (mainFile) {
+                mainImageBase64 = await compressAndConvertToBase64(mainFile);
+            } else if (mainUrl) {
+                mainImageBase64 = mainUrl;
+            }
+            
+            let extraImages = [];
+            const extraFiles = document.getElementById('projectImagesFiles').files;
             const extraUrls = document.getElementById('projectImagesUrls').value;
-            const images = parseImageUrls(mainUrl).concat(parseImageUrls(extraUrls));
+            
+            for (let i = 0; i < extraFiles.length; i++) {
+                const base64 = await compressAndConvertToBase64(extraFiles[i]);
+                extraImages.push(base64);
+            }
+            
+            if (extraUrls) {
+                const urls = extraUrls.split(',').map(u => u.trim()).filter(Boolean);
+                extraImages.push(...urls);
+            }
+            
+            const allImages = mainImageBase64 ? [mainImageBase64, ...extraImages] : extraImages;
+            
             return {
                 id: currentDraftId || Date.now(),
                 title: document.getElementById('projectTitle').value.trim(),
-                images,
+                images: allImages,
                 category: document.getElementById('projectCategory').value,
                 description: document.getElementById('projectDescription').value.trim(),
                 tags: document.getElementById('projectTags').value.split(',').map(t => t.trim()).filter(Boolean)
@@ -636,7 +773,7 @@
 
         async function autoSave() {
             if (!hasUnsavedChanges) return;
-            const project = getCurrentProjectFromForm();
+            const project = await getCurrentProjectFromFormAsync();
             localStorage.setItem('adminDraft', JSON.stringify(project));
 
             if (!project.title || !project.category || !project.description) {
@@ -840,16 +977,15 @@
             e.preventDefault();
             const status = document.getElementById('addStatus');
             status.className = 'status-msg';
-            status.innerHTML = 'جاري الحفظ...';
+            status.innerHTML = 'جاري رفع الصور وحفظ المشروع...';
             status.classList.add('show');
-
             try {
-                const project = getCurrentProjectFromForm();
+                const project = await getCurrentProjectFromFormAsync();
                 await saveProjectToAPI(project);
-
-                // Reset form
                 document.getElementById('projectForm').reset();
-                localStorage.removeItem('adminDraft'); // Clear draft
+                document.getElementById('mainImagePreview').style.display = 'none';
+                document.getElementById('extraImagesPreview').innerHTML = '';
+                localStorage.removeItem('adminDraft');
                 currentDraftId = null;
                 status.innerHTML = '✅ تم إضافة المشروع بنجاح!';
                 status.classList.add('success');
@@ -897,15 +1033,44 @@
         function editProject(id) {
             const project = projectsCache.find(p => p.id == id);
             if (!project) return;
-
             currentEditId = id;
             document.getElementById('editTitle').value = project.title;
             document.getElementById('editCategory').value = project.category;
             document.getElementById('editDescription').value = project.description;
             document.getElementById('editTags').value = project.tags.join(', ');
-            document.getElementById('editImageUrl').value = (project.images && project.images[0]) || '';
-            document.getElementById('editImagesUrls').value = (project.images && project.images.slice(1).join(', ')) || '';
 
+            const primaryUrlInput = document.getElementById('editImageUrl');
+            const primaryFileInput = document.getElementById('editImageFile');
+            const primaryPreviewDiv = document.getElementById('editMainImagePreview');
+            const primaryPreviewImg = document.getElementById('editMainPreviewImg');
+            primaryFileInput.value = '';
+            primaryPreviewDiv.style.display = 'none';
+            primaryPreviewImg.src = '';
+
+            const firstImage = project.images && project.images[0] ? project.images[0] : '';
+            if (firstImage && firstImage.startsWith('data:image')) {
+                primaryUrlInput.value = '';
+                primaryPreviewDiv.style.display = 'block';
+                primaryPreviewImg.src = firstImage;
+            } else {
+                primaryUrlInput.value = firstImage;
+            }
+
+            const extraPreview = document.getElementById('editExtraImagesPreview');
+            extraPreview.innerHTML = '';
+            document.getElementById('editImagesFiles').value = '';
+            const extraImages = project.images && project.images.length > 1 ? project.images.slice(1) : [];
+            extraImages.forEach(image => {
+                const img = document.createElement('img');
+                img.src = image;
+                img.style.width = '80px';
+                img.style.height = '80px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '8px';
+                img.style.border = '1px solid rgba(0,194,209,0.3)';
+                extraPreview.appendChild(img);
+            });
+            document.getElementById('editImagesUrls').value = (project.images && project.images.slice(1).join(', ')) || '';
             document.getElementById('editModal').classList.add('open');
         }
 
@@ -918,11 +1083,38 @@
             status.classList.add('show');
 
             try {
-                const primary = document.getElementById('editImageUrl').value;
-                const extra = document.getElementById('editImagesUrls').value;
-                const images = parseImageUrls(primary).concat(parseImageUrls(extra));
+                const project = projectsCache.find(p => p.id == currentEditId) || {};
+                const images = project.images ? [...project.images] : [];
+                const primaryFile = document.getElementById('editImageFile').files[0];
+                const primaryUrl = document.getElementById('editImageUrl').value.trim();
+                const extraFiles = document.getElementById('editImagesFiles').files;
+                const extraUrls = document.getElementById('editImagesUrls').value;
 
-                const project = {
+                if (primaryFile) {
+                    const primaryBase64 = await compressAndConvertToBase64(primaryFile);
+                    if (images.length > 0) images[0] = primaryBase64;
+                    else images.unshift(primaryBase64);
+                } else if (primaryUrl) {
+                    if (images.length > 0) images[0] = primaryUrl;
+                    else images.unshift(primaryUrl);
+                }
+
+                const extraImages = [];
+                for (let i = 0; i < extraFiles.length; i++) {
+                    const base64 = await compressAndConvertToBase64(extraFiles[i]);
+                    extraImages.push(base64);
+                }
+                if (extraUrls) {
+                    extraImages.push(...parseImageUrls(extraUrls));
+                }
+                if (extraImages.length > 0) {
+                    const primaryImage = images.length > 0 ? images[0] : null;
+                    images.length = 0;
+                    if (primaryImage) images.push(primaryImage);
+                    images.push(...extraImages);
+                }
+
+                const updatedProject = {
                     id: currentEditId,
                     title: document.getElementById('editTitle').value.trim(),
                     images: images,
@@ -931,7 +1123,7 @@
                     tags: document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(t => t)
                 };
 
-                await saveProjectToAPI(project);
+                await saveProjectToAPI(updatedProject);
                 closeModal();
                 status.innerHTML = '✅ تم حفظ التعديلات بنجاح!';
                 status.classList.add('success');
@@ -968,6 +1160,9 @@
         function closeModal() {
             document.getElementById('editModal').classList.remove('open');
             document.getElementById('editForm').reset();
+            document.getElementById('editMainImagePreview').style.display = 'none';
+            document.getElementById('editMainPreviewImg').src = '';
+            document.getElementById('editExtraImagesPreview').innerHTML = '';
             currentEditId = null;
         }
     </script>
