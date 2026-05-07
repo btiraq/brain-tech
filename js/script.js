@@ -298,7 +298,8 @@ async function initProjects() {
     }
     
     grid.innerHTML = '';
-    
+    console.log("Grid element found:", grid);
+    console.log("First project data:", projectsData[0]);
     if (!projectsData || projectsData.length === 0) {
         grid.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد مشاريع حالياً</p></div>';
         return;
