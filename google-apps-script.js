@@ -1,15 +1,14 @@
-function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ result: "ready" }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
 function doPost(e) {
   // Handle CORS preflight
   if (e.parameter.method === 'OPTIONS' || (e.postData && e.postData.contents === '')) {
     return ContentService
       .createTextOutput('')
-      .setMimeType(ContentService.MimeType.TEXT);
+      .setMimeType(ContentService.MimeType.TEXT)
+      .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
   }
 
   try {
@@ -47,34 +46,22 @@ function doPost(e) {
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
       var projectsData = projectsSheet.getDataRange().getValues();
       var projects = [];
-      function safeParseArray(value) {
-        if (!value) return [];
-        if (Array.isArray(value)) return value;
-        if (typeof value === 'string') {
-          try {
-            var parsed = JSON.parse(value);
-            return Array.isArray(parsed) ? parsed : value.split(',').map(function(item){ return item.trim(); }).filter(Boolean);
-          } catch (err) {
-            return value.split(',').map(function(item){ return item.trim(); }).filter(Boolean);
-          }
-        }
-        return [];
-      }
       for (var i = 1; i < projectsData.length; i++) { // Skip header
         if (projectsData[i][0]) {
           projects.push({
             id: projectsData[i][0],
             title: projectsData[i][1],
-            images: safeParseArray(projectsData[i][2]),
+            images: projectsData[i][2] ? projectsData[i][2].split(',') : [],
             category: projectsData[i][3],
             description: projectsData[i][4],
-            tags: safeParseArray(projectsData[i][5])
+            tags: projectsData[i][5] ? projectsData[i][5].split(',') : []
           });
         }
       }
       return ContentService
         .createTextOutput(JSON.stringify({ result: "success", projects: projects }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type'});
     } else if (data.action === 'saveProject') {
       // Save project (add or update)
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
@@ -110,20 +97,20 @@ function doPost(e) {
         projectsSheet.appendRow([
           project.id,
           project.title,
-          JSON.stringify(project.images || []),
+          project.images.join(','),
           project.category,
           project.description,
-          JSON.stringify(project.tags || [])
+          project.tags.join(',')
         ]);
       } else {
         // Update existing
         projectsSheet.getRange(rowIndex, 1, 1, 6).setValues([[
           project.id,
           project.title,
-          JSON.stringify(project.images || []),
+          project.images.join(','),
           project.category,
           project.description,
-          JSON.stringify(project.tags || [])
+          project.tags.join(',')
         ]]);
       }
 
@@ -140,7 +127,7 @@ function doPost(e) {
       }
     } else {
       // Handle contact form submission
-      var contactSheet = ss.getSheetByName('Contacts') || ss.insertSheet('Contacts');
+      var contactSheet = ss.getSheetByName('Brain Tech Contacts') || ss.insertSheet('Brain Tech Contacts');
       if (contactSheet.getLastRow() === 0) {
         contactSheet.appendRow([
           "التاريخ والوقت",
@@ -172,12 +159,14 @@ function doPost(e) {
 
     return ContentService
       .createTextOutput(JSON.stringify({ result: "success" }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type'});
 
   } catch(err) {
     return ContentService
       .createTextOutput(JSON.stringify({ result: "error", error: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type'});
   }
 }
 
@@ -186,4 +175,11 @@ function testSetup() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   Logger.log("Sheet name: " + sheet.getName());
   Logger.log("Setup OK!");
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ result: "success", message: "API is working" }))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET', 'Access-Control-Allow-Headers': 'Content-Type'});
 }

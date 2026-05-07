@@ -236,8 +236,8 @@ window.addEventListener('load', () => {
 })();
 
 // ========== PROJECTS 3D PREVIEWS ==========
-const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbwyk4JAUo9iIcS3q9ZHvovEvkxaTn5K5V1YG0z1QXOqIJKRyx9wUUw_x6S8zfK0CiOX/exec";
-const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbzKlIZkW5d5FyIKxBbJjhcVJNer0pNVZ26AK-3-fl3sWOqevUii-ATJIKmj3JBRSVc30Q/exec";
+const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzoTCOMNrDjyz0r4eyh7ZudUbrpzt9vOxYyvQIEbekUJBfaScdUg49ZrLamgfw5lXp5/exec";
+const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbyOMdnQH8psfKt3Oetm-H7lIsrVeG5xLDq4JuzDd75xHxzSPRyvQ6YXbi4nr4TJuX-Grw/exec";
 const defaultProjects = [
     { title:"PID Ball Balance Robot", tags:["AI","Raspberry Pi","Control"], desc:"روبوت يوازن الكرة باستخدام حساسات PID control مع شرح شامل وكود source كامل.", color:0x0044ff },
     { title:"Smart Home Hub", tags:["Arduino","IoT","PCB"], desc:"نظام منزل ذكي يعمل بالواي فاي وتحكم عبر تطبيق موبايل.", color:0x00aa44 },
@@ -261,6 +261,24 @@ function normalizeArrayField(value) {
     return [];
 }
 
+function getLocalProjects() {
+    try {
+        return JSON.parse(localStorage.getItem('braintechLocalProjects') || '[]');
+    } catch (err) {
+        return [];
+    }
+}
+
+function formatProjectForDisplay(p) {
+    return {
+        title: p.title || 'مشروع جديد',
+        tags: normalizeArrayField(p.tags),
+        desc: p.description || p.desc || '',
+        color: 0x00C2D1,
+        images: normalizeArrayField(p.images || p.image)
+    };
+}
+
 // Get projects from admin panel or use defaults
 async function getDisplayProjects() {
     try {
@@ -269,18 +287,23 @@ async function getDisplayProjects() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'loadProjects' })
         });
+        if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         if (data.result === 'success' && data.projects && data.projects.length > 0) {
-            return data.projects.map(p => ({
-                title: p.title || 'مشروع جديد',
-                tags: normalizeArrayField(p.tags),
-                desc: p.description || p.desc || '',
-                color: 0x00C2D1,
-                images: normalizeArrayField(p.images || p.image)
-            }));
+            const projects = data.projects.map(formatProjectForDisplay);
+            localStorage.setItem('braintechLocalProjects', JSON.stringify(data.projects));
+            return projects;
+        }
+        const local = getLocalProjects();
+        if (local.length > 0) {
+            return local.map(formatProjectForDisplay);
         }
     } catch (e) {
-        console.log('Failed to load projects from API, using defaults:', e);
+        console.log('Failed to load projects from API, using local fallback if available:', e);
+        const local = getLocalProjects();
+        if (local.length > 0) {
+            return local.map(formatProjectForDisplay);
+        }
     }
     return defaultProjects;
 }
@@ -367,10 +390,11 @@ async function initProjects() {
     });
 }
 
-// Call initProjects on load
+// Call initProjects on load and refresh projects periodically
 window.addEventListener('load', () => {
     setTimeout(() => {
         initProjects();
+        setInterval(initProjects, 10000); // refresh every 10 seconds
     }, 1800); // After loader
 });
 
