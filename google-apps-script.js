@@ -47,15 +47,28 @@ function doPost(e) {
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
       var projectsData = projectsSheet.getDataRange().getValues();
       var projects = [];
+      function safeParseArray(value) {
+        if (!value) return [];
+        if (Array.isArray(value)) return value;
+        if (typeof value === 'string') {
+          try {
+            var parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : value.split(',').map(function(item){ return item.trim(); }).filter(Boolean);
+          } catch (err) {
+            return value.split(',').map(function(item){ return item.trim(); }).filter(Boolean);
+          }
+        }
+        return [];
+      }
       for (var i = 1; i < projectsData.length; i++) { // Skip header
         if (projectsData[i][0]) {
           projects.push({
             id: projectsData[i][0],
             title: projectsData[i][1],
-            images: projectsData[i][2] ? projectsData[i][2].split(',') : [],
+            images: safeParseArray(projectsData[i][2]),
             category: projectsData[i][3],
             description: projectsData[i][4],
-            tags: projectsData[i][5] ? projectsData[i][5].split(',') : []
+            tags: safeParseArray(projectsData[i][5])
           });
         }
       }
@@ -97,20 +110,20 @@ function doPost(e) {
         projectsSheet.appendRow([
           project.id,
           project.title,
-          project.images.join(','),
+          JSON.stringify(project.images || []),
           project.category,
           project.description,
-          project.tags.join(',')
+          JSON.stringify(project.tags || [])
         ]);
       } else {
         // Update existing
         projectsSheet.getRange(rowIndex, 1, 1, 6).setValues([[
           project.id,
           project.title,
-          project.images.join(','),
+          JSON.stringify(project.images || []),
           project.category,
           project.description,
-          project.tags.join(',')
+          JSON.stringify(project.tags || [])
         ]]);
       }
 

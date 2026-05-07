@@ -1,13 +1,16 @@
 // ========== CURSOR ==========
 const cursor = document.getElementById('cursor');
 const ring = document.getElementById('cursor-ring');
+let loaderDone = false;
 let mx=0, my=0, rx=0, ry=0;
-document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx+'px'; cursor.style.top = my+'px'; });
-(function animRing() { rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12; ring.style.left = rx+'px'; ring.style.top = ry+'px'; requestAnimationFrame(animRing); })();
-document.querySelectorAll('a,button,.service-card,.project-card,.why-item,.test-card').forEach(el => {
-    el.addEventListener('mouseenter', () => { cursor.style.width='20px'; cursor.style.height='20px'; ring.style.width='60px'; ring.style.height='60px'; ring.style.opacity='0.8'; });
-    el.addEventListener('mouseleave', () => { cursor.style.width='12px'; cursor.style.height='12px'; ring.style.width='40px'; ring.style.height='40px'; ring.style.opacity='0.5'; });
-});
+if (cursor && ring) {
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx+'px'; cursor.style.top = my+'px'; });
+    (function animRing() { rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12; ring.style.left = rx+'px'; ring.style.top = ry+'px'; requestAnimationFrame(animRing); })();
+    document.querySelectorAll('a,button,.service-card,.project-card,.why-item,.test-card').forEach(el => {
+        el.addEventListener('mouseenter', () => { cursor.style.width='20px'; cursor.style.height='20px'; ring.style.width='60px'; ring.style.height='60px'; ring.style.opacity='0.8'; });
+        el.addEventListener('mouseleave', () => { cursor.style.width='12px'; cursor.style.height='12px'; ring.style.width='40px'; ring.style.height='40px'; ring.style.opacity='0.5'; });
+    });
+}
 
 // ========== LOADER + 3D SPINNING BRAIN ==========
 (function initLoader() {
@@ -35,9 +38,14 @@ window.addEventListener('load', () => {
     setTimeout(() => {
         loaderDone = true;
         const loader = document.getElementById('loader');
-        loader.style.opacity = '0';
-        loader.style.visibility = 'hidden';
-        document.getElementById('main-content') && (document.getElementById('main-content').style.opacity = '1');
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+        }
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.style.opacity = '1';
+        }
     }, 1800);
 });
 
@@ -239,6 +247,20 @@ const defaultProjects = [
     { title:"Industrial Robot Arm", tags:["Servo","Arduino","6DOF"], desc:"ذراع روبوتية 6 محاور مع تحكم دقيق وإمكانية البرمجة الكاملة.", color:0x00C2D1 }
 ];
 
+function normalizeArrayField(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : value.split(',').map(item => item.trim()).filter(Boolean);
+        } catch {
+            return value.split(',').map(item => item.trim()).filter(Boolean);
+        }
+    }
+    return [];
+}
+
 // Get projects from admin panel or use defaults
 async function getDisplayProjects() {
     try {
@@ -248,13 +270,13 @@ async function getDisplayProjects() {
             body: JSON.stringify({ action: 'loadProjects' })
         });
         const data = await response.json();
-        if (data.result === 'success' && data.projects.length > 0) {
+        if (data.result === 'success' && data.projects && data.projects.length > 0) {
             return data.projects.map(p => ({
-                title: p.title,
-                tags: p.tags || [],
-                desc: p.description || p.desc,
+                title: p.title || 'مشروع جديد',
+                tags: normalizeArrayField(p.tags),
+                desc: p.description || p.desc || '',
                 color: 0x00C2D1,
-                images: p.images || (p.image ? [p.image] : [])
+                images: normalizeArrayField(p.images || p.image)
             }));
         }
     } catch (e) {
@@ -274,7 +296,7 @@ async function initProjects() {
     const canvasId = 'proj-canvas-'+idx;
     
     // Use image if available, otherwise render 3D canvas
-    const images = p.images || (p.image ? [p.image] : []);
+    const images = normalizeArrayField(p.images || p.image);
     const hasImages = images.length > 0;
     const imageHtml = hasImages ? 
         `<img src="${images[0]}" alt="${p.title}" style="width:100%; height:100%; object-fit:cover; display:block;">` :
@@ -283,9 +305,9 @@ async function initProjects() {
     card.innerHTML = `
         <div class="project-img">${imageHtml}<div class="project-overlay"></div></div>
         <div class="project-body">
-            <div class="project-tags">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+            <div class="project-tags">${normalizeArrayField(p.tags).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
             <div class="project-title">${p.title}</div>
-            <div class="project-desc">${p.desc.substring(0,70)}...</div>
+            <div class="project-desc">${(p.desc || '').substring(0,70)}...</div>
             <div class="project-arrow">عرض التفاصيل <i class="fas fa-arrow-left"></i></div>
         </div>`;
     card.addEventListener('click', () => openModal(p));
@@ -524,18 +546,10 @@ function contact() {
 
 // Loader
 window.addEventListener("load", () => {
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("main-content").style.opacity = "1";
-});
-
-// Smooth Scroll
-document.querySelectorAll("a[href^='#']").forEach(link => {
-    link.addEventListener("click", e => {
-        e.preventDefault();
-        document.querySelector(link.getAttribute("href")).scrollIntoView({
-            behavior: "smooth"
-        });
-    });
+    const loader = document.getElementById("loader");
+    if (loader) loader.style.display = "none";
+    const mainContent = document.getElementById("main-content");
+    if (mainContent) mainContent.style.opacity = "1";
 });
 
 // ========== PWA SERVICE WORKER ==========
