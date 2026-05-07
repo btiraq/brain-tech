@@ -212,7 +212,7 @@ if (cursor && ring) {
 })();
 
 // ========== PROJECTS ==========
-const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzJbZaMdaSfazI7jZ3wzjgUA2FYKRH6SRr2EheEpvoB6jnPZRGG1zwQdIEzFhatKtMc/exec";
+const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzJbZaMdaSfazI7jZ3wzjgUA2FYKRH6SRr2EheEpvoB6jnPZRGG1zwQdIEzFhatKtMc/exec?t=${Date.now()}";
 const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbx2Xs5E6h7BCLPg5R6wTvNBIkDi8UjbOgilSzrDnxFc_-gvtLDU7q8Rg3ckNZ8U0d4oHQ/exec";
 
 const defaultProjects = [
@@ -274,6 +274,7 @@ function formatProjectForDisplay(p) {
 // Get projects from localStorage or use defaults
 async function getDisplayProjects() {
     console.log("Loading projects from localStorage...");
+    const freshUrl = "${ADMIN_API_URL}&_=${Date.now()}";
     
     const localProjects = getLocalProjects();
     if (localProjects && localProjects.length > 0) {
