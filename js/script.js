@@ -236,8 +236,8 @@ window.addEventListener('load', () => {
 })();
 
 // ========== PROJECTS 3D PREVIEWS ==========
-const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzoTCOMNrDjyz0r4eyh7ZudUbrpzt9vOxYyvQIEbekUJBfaScdUg49ZrLamgfw5lXp5/exec";
-const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbyOMdnQH8psfKt3Oetm-H7lIsrVeG5xLDq4JuzDd75xHxzSPRyvQ6YXbi4nr4TJuX-Grw/exec";
+const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzMdMftSgX-f7-xtYzQFCZBdMXGLFi_xHhwFNQBY_Wx1XYqmwmjgdzT_rL8GdBwjYLu/exec";
+const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbwuIVNmExnNseLq_1nKWH4Qxnet-WZFq8Anku5g1kLSjHrIcnzYhGo1Abr8_MxZ6ozRqw/exec";
 const defaultProjects = [
     { title:"PID Ball Balance Robot", tags:["AI","Raspberry Pi","Control"], desc:"روبوت يوازن الكرة باستخدام حساسات PID control مع شرح شامل وكود source كامل.", color:0x0044ff },
     { title:"Smart Home Hub", tags:["Arduino","IoT","PCB"], desc:"نظام منزل ذكي يعمل بالواي فاي وتحكم عبر تطبيق موبايل.", color:0x00aa44 },
