@@ -212,7 +212,7 @@ if (cursor && ring) {
 })();
 
 // ========== PROJECTS ==========
-const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzjrUoE52IBDh55K9OPgdfVUvBcoxEAvx7eEFfOLFZspxrGY03Bzzir7HThoikSFJWm/exec";
+const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzJbZaMdaSfazI7jZ3wzjgUA2FYKRH6SRr2EheEpvoB6jnPZRGG1zwQdIEzFhatKtMc/exec";
 const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbwuIVNmExnNseLq_1nKWH4Qxnet-WZFq8Anku5g1kLSjHrIcnzYhGo1Abr8_MxZ6ozRqw/exec";
 
 const defaultProjects = [
