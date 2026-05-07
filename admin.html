@@ -447,72 +447,7 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(0,194,209,0.3);
         }
-        /* FIX: Make admin panel fully responsive - no horizontal scroll */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-            overflow-x: hidden;
-        }
-
-        .form-full {
-            grid-column: 1 / -1;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-                overflow-x: auto;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .projects-table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            
-            .projects-table th,
-            .projects-table td {
-                min-width: 120px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .form-section {
-                padding: 15px;
-            }
-            
-            .form-group input,
-            .form-group textarea,
-            .form-group select {
-                font-size: 14px;
-                padding: 10px;
-            }
-            
-            .btn-submit {
-                width: 100%;
-            }
-        }
+        
     </style>
 </head>
 <body>
