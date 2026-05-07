@@ -1,12 +1,12 @@
 function doPost(e) {
   // Handle CORS preflight
-  if (e.parameter.method === 'OPTIONS' || (e.postData && e.postData.contents === '')) {
+  if (e.parameter && e.parameter.method === 'OPTIONS') {
     return ContentService
       .createTextOutput('')
       .setMimeType(ContentService.MimeType.TEXT)
       .setHeaders({
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type'
       });
   }
@@ -41,12 +41,21 @@ function doPost(e) {
       ]);
 
       loginSheet.autoResizeColumns(1, 4);
+      
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: "success" }))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeaders({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        });
     } else if (data.action === 'loadProjects') {
       // Load projects
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
       var projectsData = projectsSheet.getDataRange().getValues();
       var projects = [];
-      for (var i = 1; i < projectsData.length; i++) { // Skip header
+      for (var i = 1; i < projectsData.length; i++) {
         if (projectsData[i][0]) {
           projects.push({
             id: projectsData[i][0],
@@ -60,8 +69,12 @@ function doPost(e) {
       }
       return ContentService
         .createTextOutput(JSON.stringify({ result: "success", projects: projects }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type'});
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeaders({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        });
     } else if (data.action === 'saveProject') {
       // Save project (add or update)
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
@@ -93,7 +106,6 @@ function doPost(e) {
       }
 
       if (rowIndex === -1) {
-        // Add new
         projectsSheet.appendRow([
           project.id,
           project.title,
@@ -103,7 +115,6 @@ function doPost(e) {
           project.tags.join(',')
         ]);
       } else {
-        // Update existing
         projectsSheet.getRange(rowIndex, 1, 1, 6).setValues([[
           project.id,
           project.title,
@@ -115,6 +126,15 @@ function doPost(e) {
       }
 
       projectsSheet.autoResizeColumns(1, 6);
+      
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: "success" }))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeaders({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        });
     } else if (data.action === 'deleteProject') {
       // Delete project
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
@@ -125,6 +145,14 @@ function doPost(e) {
           break;
         }
       }
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: "success" }))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeaders({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        });
     } else {
       // Handle contact form submission
       var contactSheet = ss.getSheetByName('Brain Tech Contacts') || ss.insertSheet('Brain Tech Contacts');
@@ -155,31 +183,36 @@ function doPost(e) {
       ]);
 
       contactSheet.autoResizeColumns(1, 6);
+      
+      return ContentService
+        .createTextOutput(JSON.stringify({ result: "success" }))
+        .setMimeType(ContentService.MimeType.JSON)
+        .setHeaders({
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        });
     }
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ result: "success" }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type'});
 
   } catch(err) {
     return ContentService
       .createTextOutput(JSON.stringify({ result: "error", error: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type'});
+      .setHeaders({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      });
   }
-}
-
-// Test function - run this manually once to verify sheet access
-function testSetup() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  Logger.log("Sheet name: " + sheet.getName());
-  Logger.log("Setup OK!");
 }
 
 function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({ result: "success", message: "API is working" }))
     .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET', 'Access-Control-Allow-Headers': 'Content-Type'});
+    .setHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
 }
