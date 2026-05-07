@@ -398,11 +398,15 @@ window.addEventListener('scroll', () => {
 });
 
 // ========== SCROLL REVEAL ==========
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+function initScrollReveal() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
 
+// Call it after projects are loaded
+setTimeout(initScrollReveal, 2000);
 // ========== COUNT UP ==========
 const countObserver = new IntersectionObserver((entries) => {
     entries.forEach(e => {
