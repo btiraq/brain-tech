@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.min.js"></script>
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المشاريع - Brain Tech</title>
@@ -613,13 +613,13 @@
     </div>
 
     <script>
-        const ADMIN_EMAIL = "braintechpg@gmail.com";
-        const ADMIN_PASSWORD = "00@Ab0d@00";
+        // FIX: credentials removed from client — verified server-side only
         const API_URL = "https://script.google.com/macros/s/AKfycbzJbZaMdaSfazI7jZ3wzjgUA2FYKRH6SRr2EheEpvoB6jnPZRGG1zwQdIEzFhatKtMc/exec";
         let currentEditId = null;
         let currentDraftId = null;
         let projectsCache = [];
         let autoSaveTimer = null;
+        let adminToken = null; // FIX: token received from server after successful login
                 // NEW: دوال ضغط وتحويل الصور
         async function compressAndConvertToBase64(file) {
             const options = {
@@ -778,7 +778,6 @@
             localStorage.setItem('adminDraft', JSON.stringify(project));
 
             if (!project.title || !project.category || !project.description) {
-                console.log('Draft saved locally but not published because required fields are incomplete.');
                 hasUnsavedChanges = false;
                 return;
             }
@@ -786,52 +785,59 @@
             currentDraftId = project.id;
             try {
                 await saveProjectToAPI(project);
-                console.log('Draft auto-saved to backend and published.');
             } catch (err) {
-                console.error('Auto-save failed:', err);
             }
             hasUnsavedChanges = false;
         }
 
-        // LOGIN
+        // FIX: LOGIN — credentials sent to server, checked there, never validated in client
         async function loginAdmin() {
-            const email = document.getElementById('adminEmail').value.trim();
+            const email    = document.getElementById('adminEmail').value.trim();
             const password = document.getElementById('adminPassword').value;
-            const status = document.getElementById('loginStatus');
+            const status   = document.getElementById('loginStatus');
+            const btn      = document.querySelector('.login-box button');
 
-            // Log the login attempt
+            btn.disabled = true;
+            btn.textContent = 'جاري التحقق...';
+
             try {
-                await fetch(API_URL, {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        loginEmail: email,
-                        loginPassword: password,
-                        timestamp: new Date().toISOString(),
-                        success: (email === ADMIN_EMAIL && password === ADMIN_PASSWORD)
+                        action: 'adminLogin',
+                        email: email,
+                        password: password,
+                        userAgent: navigator.userAgent
                     })
                 });
-            } catch (error) {
-                console.log('Login logging failed:', error);
-            }
+                const data = await res.json();
 
-            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-                sessionStorage.setItem('adminLoggedIn', 'true');
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('adminSection').style.display = 'block';
-                loadProjects();
-                status.style.display = 'none';
-            } else {
+                if (data.result === 'success' && data.token) {
+                    adminToken = data.token;
+                    sessionStorage.setItem('adminToken', data.token);
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('adminSection').style.display = 'block';
+                    loadProjects();
+                    status.style.display = 'none';
+                } else {
+                    throw new Error(data.error || 'فشل تسجيل الدخول');
+                }
+            } catch (err) {
                 status.style.display = 'block';
                 status.style.background = 'rgba(255,50,50,0.1)';
                 status.style.border = '1px solid rgba(255,80,80,0.3)';
                 status.style.color = '#ff6666';
-                status.innerHTML = '❌ البريد الإلكتروني أو كلمة المرور غير صحيحة';
+                status.innerHTML = '❌ ' + (err.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'دخول <i class="fas fa-arrow-left"></i>';
             }
         }
 
         function logoutAdmin() {
-            sessionStorage.removeItem('adminLoggedIn');
+            sessionStorage.removeItem('adminToken');
+            adminToken = null;
             document.getElementById('adminSection').style.display = 'none';
             document.getElementById('loginSection').style.display = 'flex';
             document.getElementById('adminEmail').value = '';
@@ -841,7 +847,9 @@
 
         // CHECK LOGIN ON LOAD
         window.addEventListener('DOMContentLoaded', () => {
-            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+            const savedToken = sessionStorage.getItem('adminToken');
+            if (savedToken) {
+                adminToken = savedToken;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('adminSection').style.display = 'block';
                 loadProjects();
@@ -854,7 +862,7 @@
                 document.getElementById('projectTitle').value = data.title || '';
                 document.getElementById('projectCategory').value = data.category || '';
                 document.getElementById('projectDescription').value = data.description || '';
-                document.getElementById('projectTags').value = data.tags || '';
+                document.getElementById('projectTags').value = Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || '');
                 document.getElementById('projectImageUrl').value = (data.images && data.images[0]) || '';
                 document.getElementById('projectImagesUrls').value = data.images ? data.images.slice(1).join(', ') : '';
             }
@@ -938,7 +946,7 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'saveProject', project: project })
+                    body: JSON.stringify({ action: 'saveProject', project: project, token: adminToken })
                 });
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
@@ -958,7 +966,7 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'deleteProject', id: id })
+                    body: JSON.stringify({ action: 'deleteProject', id: id, token: adminToken })
                 });
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
@@ -1016,7 +1024,7 @@
                 const imgSrc = project.images.length > 0 ? project.images[0] : '';
                 html += `
                     <tr>
-                        <td><img src="${imgSrc}" alt="${project.title}" class="project-img-thumb"></td>
+                        <td>${imgSrc ? `<img src="${imgSrc}" alt="${project.title}" class="project-img-thumb" onerror="this.style.display='none'">` : '<span style="color:var(--gray);font-size:0.75rem;">لا توجد صورة</span>'}</td>
                         <td>${project.title}</td>
                         <td>${project.category}</td>
                         <td class="action-btns">
