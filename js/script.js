@@ -213,7 +213,7 @@ if (cursor && ring) {
 
 // ========== PROJECTS ==========
 const ADMIN_API_URL = "https://script.google.com/macros/s/AKfycbzJbZaMdaSfazI7jZ3wzjgUA2FYKRH6SRr2EheEpvoB6jnPZRGG1zwQdIEzFhatKtMc/exec?t=${Date.now()}";
-const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbx2Xs5E6h7BCLPg5R6wTvNBIkDi8UjbOgilSzrDnxFc_-gvtLDU7q8Rg3ckNZ8U0d4oHQ/exec";
+const CONTACT_API_URL = "https://script.google.com/macros/s/AKfycbxspo4WgwANBv9rFBipPCc-ZeWklOKFE0A0tcXcdmzFaokJ9Gdx4MrQubCJoVuGDBhqEg/exec";
 
 const defaultProjects = [
     { title:"PID Ball Balance Robot", tags:["AI","Raspberry Pi","Control"], desc:"روبوت يوازن الكرة باستخدام حساسات PID control مع شرح شامل وكود source كامل.", color:0x0044ff, images:[] },
