@@ -1,14 +1,11 @@
 function doPost(e) {
   // Handle CORS preflight
   if (e.parameter && e.parameter.method === 'OPTIONS') {
-    return ContentService
-      .createTextOutput('')
-      .setMimeType(ContentService.MimeType.TEXT)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+    return HtmlService.createHtmlOutput('')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      .setTitle('')
+      .setSandboxMode(HtmlService.SandboxMode.IFRAME);
   }
 
   try {
@@ -44,12 +41,7 @@ function doPost(e) {
       
       return ContentService
         .createTextOutput(JSON.stringify({ result: "success" }))
-        .setMimeType(ContentService.MimeType.JSON)
-        .setHeaders({
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type'
-        });
+        .setMimeType(ContentService.MimeType.JSON);
     } else if (data.action === 'loadProjects') {
       // Load projects
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
@@ -69,12 +61,7 @@ function doPost(e) {
       }
       return ContentService
         .createTextOutput(JSON.stringify({ result: "success", projects: projects }))
-        .setMimeType(ContentService.MimeType.JSON)
-        .setHeaders({
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type'
-        });
+        .setMimeType(ContentService.MimeType.JSON);
     } else if (data.action === 'saveProject') {
       // Save project (add or update)
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
@@ -129,12 +116,7 @@ function doPost(e) {
       
       return ContentService
         .createTextOutput(JSON.stringify({ result: "success" }))
-        .setMimeType(ContentService.MimeType.JSON)
-        .setHeaders({
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type'
-        });
+        .setMimeType(ContentService.MimeType.JSON);
     } else if (data.action === 'deleteProject') {
       // Delete project
       var projectsSheet = ss.getSheetByName('admin & Uploads') || ss.insertSheet('admin & Uploads');
@@ -147,12 +129,7 @@ function doPost(e) {
       }
       return ContentService
         .createTextOutput(JSON.stringify({ result: "success" }))
-        .setMimeType(ContentService.MimeType.JSON)
-        .setHeaders({
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type'
-        });
+        .setMimeType(ContentService.MimeType.JSON);
     } else {
       // Handle contact form submission
       var contactSheet = ss.getSheetByName('Brain Tech Contacts') || ss.insertSheet('Brain Tech Contacts');
@@ -186,33 +163,18 @@ function doPost(e) {
       
       return ContentService
         .createTextOutput(JSON.stringify({ result: "success" }))
-        .setMimeType(ContentService.MimeType.JSON)
-        .setHeaders({
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type'
-        });
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
   } catch(err) {
     return ContentService
       .createTextOutput(JSON.stringify({ result: "error", error: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders({
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      });
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({ result: "success", message: "API is working" }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
+    .setMimeType(ContentService.MimeType.JSON);
 }
