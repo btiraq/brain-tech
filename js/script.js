@@ -189,7 +189,7 @@ if (cursor && ring) {
 // ========== PROJECTS ==========
 // FIX: use the same single API URL for both loading projects and contact form
 // Two separate actions keep data completely isolated in different sheets
-const PROJECTS_API_URL = "https://script.google.com/macros/s/AKfycbzJbZaMdaSfazI7jZ3wzjgUA2FYKRH6SRr2EheEpvoB6jnPZRGG1zwQdIEzFhatKtMc/exec";
+const PROJECTS_API_URL = "https://script.google.com/macros/s/AKfycbyeLrf6rZmcwpxYzdlBNvjZDRhguP0_Jrf89IwK7qnLC8rOUPZgDfb2QugW0UntmvN7/exec";
 const CONTACT_API_URL  = "https://script.google.com/macros/s/AKfycbx2Xs5E6h7BCLPg5R6wTvNBIkDi8UjbOgilSzrDnxFc_-gvtLDU7q8Rg3ckNZ8U0d4oHQ/exec";
 
 const defaultProjects = [
